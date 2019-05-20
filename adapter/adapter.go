@@ -1,4 +1,4 @@
-package cacher
+package adapter
 
 import "time"
 
