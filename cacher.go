@@ -2,18 +2,8 @@ package cacher
 
 import "github.com/5046312/cacher/adapter"
 
-type Cacher struct {
-	adapter map[adapter.CacherType]adapter.Adapter
-}
-
-var cacher *Cacher
-
-func getCacher() *Cacher {
-	if cacher == nil {
-		cacher = &Cacher{}
-	}
-	return cacher
-}
+// 每个adapter只能赋值一次
+var adapters map[adapter.CacherType]adapter.Adapter
 
 func FileConfig() *adapter.CacherFile {
 	return adapter.DefaultCacherFileConfig()
@@ -21,9 +11,10 @@ func FileConfig() *adapter.CacherFile {
 
 func SetFile(fc *adapter.CacherFile) adapter.Adapter {
 	// 判断是否已经加载过对应adapter
-	if _, ok := getCacher().adapter[adapter.TypeFile]; ok {
+	if _, ok := adapters[adapter.TypeFile]; ok {
 		panic("Cacher: `" + adapter.TypeFile + "` Already Loaded!")
 	}
+	adapters[adapter.TypeFile] = fc
 	return fc
 }
 
