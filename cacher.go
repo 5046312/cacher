@@ -2,6 +2,13 @@ package cacher
 
 import "github.com/5046312/cacher/adapter"
 
+var (
+	File     adapter.Adapter
+	Memory   adapter.Adapter
+	Redis    adapter.Adapter
+	Memcache adapter.Adapter
+)
+
 // 每个adapter只能赋值一次
 var adapters map[adapter.CacherType]adapter.Adapter
 
