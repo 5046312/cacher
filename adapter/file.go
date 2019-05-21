@@ -2,53 +2,69 @@ package adapter
 
 import "time"
 
-type CacherFile struct {
+const (
+	FILE_CACHER_PATH string = "./runtime/cache/"
+	FILE_CACHER_EXT  string = ".cache"
+)
+
+type FileCacher struct {
+	Path string
+	Ext  string
 }
 
-func SetFile(fc *CacherFile) {
-
+type CacheFile struct {
+	Key  string
+	Data interface{}
+	Exp  time.Duration
 }
 
-func (CacherFile) Get(key string) interface{} {
-	panic("implement me")
+//
+func NewFileCacher(path string, ext string) *FileCacher {
+	fc := DefaultFileCacher()
+	fc.setPath(path)
+	fc.setExt(ext)
+	return fc
 }
 
-func (CacherFile) All(keys []string) []interface{} {
-	panic("implement me")
+// 默认配置
+func DefaultFileCacher() *FileCacher {
+	return &FileCacher{FILE_CACHER_PATH, FILE_CACHER_EXT}
 }
 
-func (CacherFile) Set(key string, val interface{}, timeout time.Duration) error {
-	panic("implement me")
+// TODO
+func (fc *FileCacher) setPath(path string) {
+	fc.Path = path
 }
 
-func (CacherFile) Inc(key string) error {
-	panic("implement me")
+// TODO
+func (fc *FileCacher) setExt(ext string) {
+	fc.Ext = ext
 }
 
-func (CacherFile) Dec(key string) error {
-	panic("implement me")
+func (fc *FileCacher) Get(key string) interface{} {
+	return nil
 }
-
-func (CacherFile) Remove(key string) error {
-	panic("implement me")
+func (fc *FileCacher) All(keys []string) []interface{} {
+	return nil
 }
-
-func (CacherFile) Pull(key string) interface{} {
-	panic("implement me")
+func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) error {
+	return nil
 }
-
-func (CacherFile) IsExist(key string) bool {
-	panic("implement me")
+func (fc *FileCacher) Inc(key string) error {
+	return nil
 }
-
-func (CacherFile) Clear() error {
-	panic("implement me")
+func (fc *FileCacher) Dec(key string) error {
+	return nil
 }
-
-func (CacherFile) Tag(tag string) error {
-	panic("implement me")
+func (fc *FileCacher) Remove(key string) error {
+	return nil
 }
-
-func DefaultCacherFileConfig() *CacherFile {
-	return &CacherFile{}
+func (fc *FileCacher) Pull(key string) interface{} {
+	return nil
+}
+func (fc *FileCacher) IsExist(key string) bool {
+	return false
+}
+func (fc *FileCacher) Clear() error {
+	return nil
 }

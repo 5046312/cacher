@@ -9,30 +9,23 @@ var (
 	Memcache adapter.Adapter
 )
 
-// 每个adapter只能赋值一次
-var adapters map[adapter.CacherType]adapter.Adapter
-
-func FileConfig() *adapter.CacherFile {
-	return adapter.DefaultCacherFileConfig()
+// File Cacher
+func NewFileCacher(path string, ext string) adapter.Adapter {
+	return adapter.NewFileCacher(path, ext)
+}
+func DefaultFileCacher() adapter.Adapter {
+	return adapter.DefaultFileCacher()
 }
 
-func SetFile(fc *adapter.CacherFile) adapter.Adapter {
-	// 判断是否已经加载过对应adapter
-	if _, ok := adapters[adapter.TypeFile]; ok {
-		panic("Cacher: `" + adapter.TypeFile + "` Already Loaded!")
-	}
-	adapters[adapter.TypeFile] = fc
-	return fc
-}
-
-func SetMemory() {
+// Memory Cacher
+func MemoryCacher() {
 
 }
 
-func SetRedis() {
+func RedisCacher() {
 
 }
 
-func SetMemcache() {
+func MemcacheCacher() {
 
 }
