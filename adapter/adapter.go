@@ -15,8 +15,13 @@ type Adapter interface {
 	Dec(key string) error
 	Remove(key string) error
 	Pull(key string) interface{}
-	IsExist(key string) bool
 	Clear() error
+}
+
+type CacheItem struct {
+	Key  string
+	Data interface{}
+	Exp  time.Time
 }
 
 type CacherType string
@@ -29,7 +34,7 @@ const (
 )
 
 // Go Gob 序列化
-func GobEncode(data interface{}) []byte {
+func GobEncode(data *CacheItem) []byte {
 	buffer := bytes.NewBuffer(nil)
 	encoder := gob.NewEncoder(buffer)
 	err := encoder.Encode(data)
@@ -40,7 +45,7 @@ func GobEncode(data interface{}) []byte {
 }
 
 // Go Gob 反序列化
-func GobDecode(data []byte, to interface{}) error {
+func GobDecode(data []byte, to *CacheItem) error {
 	buffer := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buffer)
 	return decoder.Decode(&to)

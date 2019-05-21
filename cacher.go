@@ -10,8 +10,8 @@ var (
 )
 
 // File Cacher
-func NewFileCacher(path string, ext string) adapter.Adapter {
-	return adapter.NewFileCacher(path, ext)
+func NewFileCacher(path string) adapter.Adapter {
+	return adapter.NewFileCacher(path)
 }
 func DefaultFileCacher() adapter.Adapter {
 	return adapter.DefaultFileCacher()

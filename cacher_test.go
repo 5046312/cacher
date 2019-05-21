@@ -10,10 +10,17 @@ func TestLoadFile(t *testing.T) {
 }
 
 func TestNewFile(t *testing.T) {
-	fc := NewFileCacher("./runtime/cache/", ".cache")
-	fc.Set("a", 123, 3)
+	fc := NewFileCacher("./runtime/cache/")
+	fc.Set("abc", 123, 300)
 }
+
 func TestFileGet(t *testing.T) {
 	fc := DefaultFileCacher()
-	fc.Get("abc")
+	value := fc.Get("abc")
+	t.Log(value)
+}
+
+func TestClear(t *testing.T) {
+	fc := NewFileCacher("./runtime/cache/")
+	fc.Clear()
 }

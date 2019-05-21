@@ -3,6 +3,7 @@ package adapter
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -13,7 +14,7 @@ import (
 
 const (
 	FILE_CACHER_PATH string = "./runtime/cache/"
-	FILE_CACHER_EXT  string = ".cache"
+	FILE_CACHER_EXT  string = ""
 )
 
 type FileCacher struct {
@@ -21,17 +22,10 @@ type FileCacher struct {
 	Ext  string
 }
 
-type CacheFile struct {
-	Key  string
-	Data interface{}
-	Exp  time.Time
-}
-
 //
-func NewFileCacher(path string, ext string) *FileCacher {
+func NewFileCacher(path string) *FileCacher {
 	fc := DefaultFileCacher()
 	fc.setPath(path)
-	fc.setExt(ext)
 	return fc
 }
 
@@ -61,56 +55,66 @@ func (fc *FileCacher) getCacheFileName(key string) string {
 	md5Key := hex.EncodeToString(m.Sum(nil))
 	cachePath := filepath.Join(fc.Path, md5Key[10:12], md5Key[20:22])
 	os.MkdirAll(cachePath, os.ModePerm)
-	return filepath.Join(cachePath, md5Key)
+	return filepath.Join(cachePath, md5Key+fc.Ext)
 }
 
+//
 func (fc *FileCacher) Get(key string) interface{} {
 	filename := fc.getCacheFileName(key)
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil
 	}
-	cache := &CacheFile{}
+	cache := &CacheItem{}
 	err = GobDecode(data, cache)
-	if err != nil {
+	if err != nil || cache.Exp.Before(time.Now()) {
+		fc.Remove(key)
 		return nil
 	}
-
-	if cache.Exp.Before(time.Now()) {
-		return nil
-	}
-
-	// TODO: EXP
 	return cache.Data
 }
+
+//
 func (fc *FileCacher) All(keys []string) []interface{} {
 	return nil
 }
+
+// Set
 func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) error {
 	filename := fc.getCacheFileName(key)
-	cache := &CacheFile{
+	fmt.Println(filename)
+	cache := &CacheItem{
 		Key:  key,
 		Data: val,
-		Exp:  time.Now().Add(timeout),
+		Exp:  time.Now().Add(timeout * time.Second),
 	}
 	return ioutil.WriteFile(filename, GobEncode(cache), os.ModePerm)
 }
+
+//
 func (fc *FileCacher) Inc(key string) error {
 	return nil
 }
+
+//
 func (fc *FileCacher) Dec(key string) error {
 	return nil
 }
+
+//
 func (fc *FileCacher) Remove(key string) error {
 	filename := fc.getCacheFileName(key)
 	return os.Remove(filename)
 }
+
+//
 func (fc *FileCacher) Pull(key string) interface{} {
-	return nil
+	cache := fc.Get(key)
+	fc.Remove(key)
+	return cache
 }
-func (fc *FileCacher) IsExist(key string) bool {
-	return false
-}
+
+//
 func (fc *FileCacher) Clear() error {
-	return nil
+	return os.RemoveAll(fc.Path)
 }
