@@ -1,6 +1,10 @@
 package adapter
 
-import "time"
+import (
+	"bytes"
+	"encoding/gob"
+	"time"
+)
 
 type Adapter interface {
 	Get(key string) interface{}
@@ -23,3 +27,21 @@ const (
 	TypeRedis    CacherType = "redis"
 	TypeMemcache CacherType = "memcache"
 )
+
+// Go Gob 序列化
+func GobEncode(data interface{}) []byte {
+	buffer := bytes.NewBuffer(nil)
+	encoder := gob.NewEncoder(buffer)
+	err := encoder.Encode(data)
+	if err != nil {
+		return nil
+	}
+	return buffer.Bytes()
+}
+
+// Go Gob 反序列化
+func GobDecode(data []byte, to interface{}) error {
+	buffer := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buffer)
+	return decoder.Decode(&to)
+}

@@ -1,6 +1,15 @@
 package adapter
 
-import "time"
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+)
 
 const (
 	FILE_CACHER_PATH string = "./runtime/cache/"
@@ -15,7 +24,7 @@ type FileCacher struct {
 type CacheFile struct {
 	Key  string
 	Data interface{}
-	Exp  time.Duration
+	Exp  time.Time
 }
 
 //
@@ -28,27 +37,63 @@ func NewFileCacher(path string, ext string) *FileCacher {
 
 // 默认配置
 func DefaultFileCacher() *FileCacher {
-	return &FileCacher{FILE_CACHER_PATH, FILE_CACHER_EXT}
+	fc := &FileCacher{FILE_CACHER_PATH, FILE_CACHER_EXT}
+	fc.setPath(FILE_CACHER_PATH)
+	return fc
 }
 
-// TODO
+// Set File Cache Path
 func (fc *FileCacher) setPath(path string) {
 	fc.Path = path
+	// Create Fold
+	os.MkdirAll(fc.Path, os.ModePerm)
 }
 
-// TODO
+// Set File Cache Ext
 func (fc *FileCacher) setExt(ext string) {
-	fc.Ext = ext
+	fc.Ext = "." + strings.Trim(ext, ".")
+}
+
+// Get Cache File Name
+func (fc *FileCacher) getCacheFileName(key string) string {
+	m := md5.New()
+	io.WriteString(m, key)
+	md5Key := hex.EncodeToString(m.Sum(nil))
+	cachePath := filepath.Join(fc.Path, md5Key[10:12], md5Key[20:22])
+	os.MkdirAll(cachePath, os.ModePerm)
+	return filepath.Join(cachePath, md5Key)
 }
 
 func (fc *FileCacher) Get(key string) interface{} {
-	return nil
+	filename := fc.getCacheFileName(key)
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil
+	}
+	cache := &CacheFile{}
+	err = GobDecode(data, cache)
+	if err != nil {
+		return nil
+	}
+
+	if cache.Exp.Before(time.Now()) {
+		return nil
+	}
+
+	// TODO: EXP
+	return cache.Data
 }
 func (fc *FileCacher) All(keys []string) []interface{} {
 	return nil
 }
 func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) error {
-	return nil
+	filename := fc.getCacheFileName(key)
+	cache := &CacheFile{
+		Key:  key,
+		Data: val,
+		Exp:  time.Now().Add(timeout),
+	}
+	return ioutil.WriteFile(filename, GobEncode(cache), os.ModePerm)
 }
 func (fc *FileCacher) Inc(key string) error {
 	return nil
@@ -57,7 +102,8 @@ func (fc *FileCacher) Dec(key string) error {
 	return nil
 }
 func (fc *FileCacher) Remove(key string) error {
-	return nil
+	filename := fc.getCacheFileName(key)
+	return os.Remove(filename)
 }
 func (fc *FileCacher) Pull(key string) interface{} {
 	return nil
