@@ -8,11 +8,11 @@ import (
 
 type Adapter interface {
 	Get(key string) interface{}
-	All(keys []string) []interface{}
+	// All(keys []string) []interface{}
 	Set(key string, val interface{}, timeout time.Duration) error
 	// Tag(tag string, key string, val interface{}, timeout time.Duration) *Adapter
-	Inc(key string) error
-	Dec(key string) error
+	// Inc(key string) error
+	// Dec(key string) error
 	Remove(key string) error
 	Pull(key string) interface{}
 	Clear() error

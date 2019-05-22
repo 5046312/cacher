@@ -17,6 +17,7 @@ const (
 	FILE_CACHER_EXT  string = ""
 )
 
+// File Adapter
 type FileCacher struct {
 	Path string
 	Ext  string
@@ -74,11 +75,6 @@ func (fc *FileCacher) Get(key string) interface{} {
 	return cache.Data
 }
 
-//
-func (fc *FileCacher) All(keys []string) []interface{} {
-	return nil
-}
-
 // Set
 func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) error {
 	filename := fc.getCacheFileName(key)
@@ -89,16 +85,6 @@ func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) er
 		Exp:  time.Now().Add(timeout * time.Second),
 	}
 	return ioutil.WriteFile(filename, GobEncode(cache), os.ModePerm)
-}
-
-//
-func (fc *FileCacher) Inc(key string) error {
-	return nil
-}
-
-//
-func (fc *FileCacher) Dec(key string) error {
-	return nil
 }
 
 //

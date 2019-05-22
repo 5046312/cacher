@@ -1,6 +1,10 @@
 package cacher
 
-import "github.com/5046312/cacher/adapter"
+import (
+	"time"
+
+	"github.com/5046312/cacher/adapter"
+)
 
 var (
 	File     adapter.Adapter
@@ -18,14 +22,20 @@ func DefaultFileCacher() adapter.Adapter {
 }
 
 // Memory Cacher
-func MemoryCacher() {
+func NewMemoryCacher(gcTime time.Duration) adapter.Adapter {
+	return adapter.NewMemoryCacher(gcTime)
+}
+
+func DefaultMemoryCacher() adapter.Adapter {
+	return adapter.DefaultMemoryCacher()
+}
+
+// Redis Cacher
+func NewRedisCacher() {
 
 }
 
-func RedisCacher() {
-
-}
-
-func MemcacheCacher() {
+// Memcache Cacher
+func NewMemcacheCacher() {
 
 }
