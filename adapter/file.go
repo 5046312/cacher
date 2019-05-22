@@ -67,8 +67,8 @@ func (fc *FileCacher) Get(key string) interface{} {
 		return nil
 	}
 	cache := &CacheItem{}
-	err = GobDecode(data, cache)
-	if err != nil || cache.Exp.Before(time.Now()) {
+	err = cache.GobDecode(data)
+	if err != nil || cache.isExpired() {
 		fc.Remove(key)
 		return nil
 	}
@@ -80,11 +80,12 @@ func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) er
 	filename := fc.getCacheFileName(key)
 	fmt.Println(filename)
 	cache := &CacheItem{
-		Key:  key,
-		Data: val,
-		Exp:  time.Now().Add(timeout * time.Second),
+		Key:      key,
+		Data:     val,
+		CreateAt: time.Now(),
+		Exp:      timeout * time.Second,
 	}
-	return ioutil.WriteFile(filename, GobEncode(cache), os.ModePerm)
+	return ioutil.WriteFile(filename, cache.GobEncode(), os.ModePerm)
 }
 
 //

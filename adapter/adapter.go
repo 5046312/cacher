@@ -19,9 +19,10 @@ type Adapter interface {
 }
 
 type CacheItem struct {
-	Key  string
-	Data interface{}
-	Exp  time.Time
+	Key      string
+	Data     interface{}
+	CreateAt time.Time
+	Exp      time.Duration
 }
 
 type CacherType string
@@ -33,8 +34,13 @@ const (
 	TypeMemcache CacherType = "memcache"
 )
 
+// 验证过期
+func (item *CacheItem) isExpired() bool {
+	return item.Exp != 0 && item.CreateAt.Add(item.Exp).Before(time.Now())
+}
+
 // Go Gob 序列化
-func GobEncode(data *CacheItem) []byte {
+func (data *CacheItem) GobEncode() []byte {
 	buffer := bytes.NewBuffer(nil)
 	encoder := gob.NewEncoder(buffer)
 	err := encoder.Encode(data)
@@ -45,7 +51,7 @@ func GobEncode(data *CacheItem) []byte {
 }
 
 // Go Gob 反序列化
-func GobDecode(data []byte, to *CacheItem) error {
+func (to *CacheItem) GobDecode(data []byte) error {
 	buffer := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buffer)
 	return decoder.Decode(&to)
