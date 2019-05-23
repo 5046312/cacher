@@ -7,15 +7,15 @@ import (
 )
 
 type Adapter interface {
-	Get(key string) interface{}
-	// All(keys []string) []interface{}
 	Set(key string, val interface{}, timeout time.Duration) error
-	// Tag(tag string, key string, val interface{}, timeout time.Duration) *Adapter
-	// Inc(key string) error
-	// Dec(key string) error
+	Get(key string) interface{}
 	Remove(key string) error
 	Pull(key string) interface{}
 	Clear() error
+	// All(keys []string) []interface{}
+	// Tag(tag string, key string, val interface{}, timeout time.Duration) *Adapter
+	// Inc(key string) error
+	// Dec(key string) error
 }
 
 type CacheItem struct {
@@ -34,7 +34,7 @@ const (
 	TypeMemcache CacherType = "memcache"
 )
 
-// 验证过期
+// 验证过期，过期返回true
 func (item *CacheItem) isExpired() bool {
 	return item.Exp != 0 && item.CreateAt.Add(item.Exp).Before(time.Now())
 }

@@ -54,7 +54,7 @@ func (fc *FileCacher) getCacheFileName(key string) string {
 	m := md5.New()
 	io.WriteString(m, key)
 	md5Key := hex.EncodeToString(m.Sum(nil))
-	cachePath := filepath.Join(fc.Path, md5Key[10:12], md5Key[20:22])
+	cachePath := filepath.Join(fc.Path, md5Key[0:2])
 	os.MkdirAll(cachePath, os.ModePerm)
 	return filepath.Join(cachePath, md5Key+fc.Ext)
 }

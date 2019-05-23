@@ -3,6 +3,7 @@ package cacher
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 // File
@@ -32,4 +33,5 @@ func TestClear(t *testing.T) {
 func Test_Memory_Init(t *testing.T) {
 	mc := DefaultMemoryCacher()
 	fmt.Println(mc)
+	time.Sleep(60 * time.Second)
 }

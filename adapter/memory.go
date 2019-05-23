@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	MEMORY_GC_Time = time.Duration(60) * time.Second
+	MEMORY_GC_Time = time.Duration(10) * time.Second
 )
 
 // Memory Adapter
@@ -16,28 +16,22 @@ type MemoryCacher struct {
 	GC_Time time.Duration
 }
 
+//
 func DefaultMemoryCacher() *MemoryCacher {
 	return NewMemoryCacher(MEMORY_GC_Time)
 }
 
+//
 func NewMemoryCacher(gcTime time.Duration) *MemoryCacher {
-	return &MemoryCacher{
+	mc := &MemoryCacher{
 		Caches:  make(map[string]*CacheItem),
 		GC_Time: gcTime,
 	}
+	go mc.gc()
+	return mc
 }
 
-// 检测key是否过期
-// 过期则删除，返回 true
-// 未过期，返回false
-func (mc *MemoryCacher) isExp(item *CacheItem) bool {
-	if item.isExpired() {
-		return true
-	}
-	return false
-}
-
-//
+// 过期删除，存在则返回
 func (mc *MemoryCacher) Get(key string) interface{} {
 	mc.RLock()
 	defer mc.RUnlock()
@@ -72,12 +66,22 @@ func (mc *MemoryCacher) Remove(key string) error {
 
 //
 func (mc *MemoryCacher) Pull(key string) interface{} {
-	val := mc.Get(key)
 	defer mc.Remove(key)
-	return val
-
+	return mc.Get(key)
 }
+
+//
 func (mc *MemoryCacher) Clear() error {
 	mc.Caches = make(map[string]*CacheItem)
 	return nil
+}
+
+// GC
+func (mc *MemoryCacher) gc() {
+	for {
+		<-time.After(mc.GC_Time)
+		for key := range mc.Caches {
+			mc.Get(key)
+		}
+	}
 }
