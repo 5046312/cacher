@@ -40,7 +40,7 @@ func (mc *MemcacheCacher) Get(key string) interface{} {
 	data := item.Value
 	cache := &CacheItem{}
 	cache.GobDecode(data)
-	return cache
+	return cache.Data
 }
 
 // Remove
