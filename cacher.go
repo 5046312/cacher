@@ -36,6 +36,6 @@ func NewRedisCacher() {
 }
 
 // Memcache Cacher
-func NewMemcacheCacher() {
-
+func NewMemcacheCacher(server ...string) adapter.Adapter {
+	return adapter.NewMemcacheCacher(server...)
 }

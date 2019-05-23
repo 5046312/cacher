@@ -35,3 +35,8 @@ func Test_Memory_Init(t *testing.T) {
 	fmt.Println(mc)
 	time.Sleep(60 * time.Second)
 }
+
+func Test_Memcache_Init(t *testing.T) {
+	mc := NewMemcacheCacher("123")
+	fmt.Println(mc)
+}

@@ -25,6 +25,15 @@ type CacheItem struct {
 	Exp      time.Duration
 }
 
+func NewCacheItem(key string, data interface{}, exp time.Duration) *CacheItem {
+	return &CacheItem{
+		Key:      key,
+		Data:     data,
+		CreateAt: time.Now(),
+		Exp:      exp,
+	}
+}
+
 type CacherType string
 
 const (
