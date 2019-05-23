@@ -3,7 +3,6 @@ package adapter
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -78,13 +77,7 @@ func (fc *FileCacher) Get(key string) interface{} {
 // Set
 func (fc *FileCacher) Set(key string, val interface{}, timeout time.Duration) error {
 	filename := fc.getCacheFileName(key)
-	fmt.Println(filename)
-	cache := &CacheItem{
-		Key:      key,
-		Data:     val,
-		CreateAt: time.Now(),
-		Exp:      timeout * time.Second,
-	}
+	cache := NewCacheItem(key, val, timeout)
 	return ioutil.WriteFile(filename, cache.GobEncode(), os.ModePerm)
 }
 

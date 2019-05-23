@@ -49,12 +49,7 @@ func (mc *MemoryCacher) Get(key string) interface{} {
 
 //
 func (mc *MemoryCacher) Set(key string, val interface{}, timeout time.Duration) error {
-	mc.Caches[key] = &CacheItem{
-		Key:      key,
-		Data:     val,
-		CreateAt: time.Now(),
-		Exp:      timeout * time.Second,
-	}
+	mc.Caches[key] = NewCacheItem(key, val, timeout)
 	return nil
 }
 
