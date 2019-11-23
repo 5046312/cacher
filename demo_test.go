@@ -12,4 +12,18 @@ func Test_Memory(t *testing.T) {
 
 	val, err = Memory.Get("b")
 	t.Log(val, err)
+
+	Memory.Remove("c")
+	Memory.Remove("b")
+
+	val, err = Memory.Get("b")
+	t.Log(val, err)
+
+	mLen := Memory.Len()
+	t.Log(mLen)
+
+	Memory.Set(map[string]string{"123": "abc"}, 123)
+
+	keys := Memory.Keys()
+	t.Log(keys)
 }

@@ -53,7 +53,7 @@ func (mc *memoryCacher) SetExpire(key, value interface{}, exp time.Duration) err
 	}
 	// exp 不大于 0 时，为永久缓存
 	if exp <= 0 {
-		ci.exp = time.Date(3018, 11, 23, 22, 44, 0, 0, time.Local)
+		ci.exp = farTime
 	}
 	mc.cache[key] = ci
 	return nil

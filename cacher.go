@@ -29,4 +29,7 @@ func (ci *cacherItem) expired() bool {
 	return ci.exp.Before(time.Now())
 }
 
-const gcTime = time.Hour
+var (
+	gcTime  = time.Hour
+	farTime = time.Date(3018, 11, 23, 22, 44, 0, 0, time.Local)
+)
