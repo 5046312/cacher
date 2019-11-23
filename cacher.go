@@ -5,6 +5,7 @@ import (
 )
 
 type cacher interface {
+	Clone() cacher
 	Set(key, value interface{}) error
 	SetExpire(key, value interface{}, exp time.Duration) error
 	Has(key interface{}) bool

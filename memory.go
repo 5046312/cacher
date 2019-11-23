@@ -6,7 +6,7 @@ type memoryCacher struct {
 	GC time.Duration
 }
 
-func (mc *memoryCacher) Clone() *memoryCacher {
+func (mc *memoryCacher) Clone() cacher {
 	newCacher := &memoryCacher{
 		GC: mc.GC,
 	}
