@@ -26,6 +26,7 @@ type cacherItem struct {
 
 // 该数据是否过期
 func (ci *cacherItem) expired() bool {
-
 	return ci.exp.Before(time.Now())
 }
+
+const gcTime = time.Hour
