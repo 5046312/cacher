@@ -3,8 +3,8 @@ package gocacher
 import "time"
 
 type File struct {
-	PATH string
-	EXT  string
+	Path string
+	Ext  string
 }
 
 func (*File) Set(key, value interface{}) error {

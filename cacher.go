@@ -5,7 +5,8 @@ import (
 )
 
 type cacher interface {
-	Clone() cacher
+	Init(config map[string]interface{}) cacher
+	Clone(config map[string]interface{}) cacher
 	Set(key, value interface{}) error
 	SetExpire(key, value interface{}, exp time.Duration) error
 	Has(key interface{}) bool
@@ -17,4 +18,14 @@ type cacher interface {
 	Len() int
 }
 
-var Memory cacher = &memoryCacher{}
+type cacherItem struct {
+	key interface{}
+	val interface{}
+	exp time.Time
+}
+
+// 该数据是否过期
+func (ci *cacherItem) expired() bool {
+
+	return ci.exp.Before(time.Now())
+}

@@ -2,41 +2,81 @@ package gocacher
 
 import "time"
 
-type memoryCacher struct {
-	GC time.Duration
+var Memory cacher = &memoryCacher{
+	gc:    time.Minute,
+	cache: map[interface{}]*cacherItem{},
 }
 
-func (mc *memoryCacher) Clone() cacher {
-	newCacher := &memoryCacher{
-		GC: mc.GC,
-	}
+type memoryCacher struct {
+	cache map[interface{}]*cacherItem
+	gc    time.Duration
+}
+
+func (mc *memoryCacher) Init(config map[string]interface{}) cacher {
+	return mc
+}
+
+func (mc *memoryCacher) Clone(config map[string]interface{}) cacher {
+	newCacher := &memoryCacher{}
+	newCacher.Init(config)
 	return newCacher
 }
 
-func (*memoryCacher) Set(key, value interface{}) error {
+func (mc *memoryCacher) Set(key, value interface{}) error {
+	ci := &cacherItem{
+		key: key,
+		val: value,
+		exp: nil,
+	}
+	mc.cache[key] = ci
 	return nil
 }
-func (*memoryCacher) SetExpire(key, value interface{}, exp time.Duration) error {
+func (mc *memoryCacher) SetExpire(key, value interface{}, exp time.Duration) error {
+	ci := &cacherItem{
+		key: key,
+		val: value,
+		exp: time.Now().Add(exp),
+	}
+	// exp 不大于 0 时，为永久缓存
+	if exp <= 0 {
+		ci.exp = time.Date(3018, 11, 23, 22, 44, 0, 0, time.Local)
+	}
+	mc.cache[key] = ci
 	return nil
 }
-func (*memoryCacher) Has(key interface{}) bool {
-	return false
+func (mc *memoryCacher) Has(key interface{}) bool {
+	_, exist := mc.cache[key]
+	return exist
 }
-func (*memoryCacher) Get(key interface{}) (interface{}, error) {
-	return nil, nil
+func (mc *memoryCacher) Get(key interface{}) (interface{}, error) {
+	val, exist := mc.cache[key]
+	if exist && val.expired() {
+		// 判断是否过期
+		mc.Remove(key)
+		return nil, nil
+	}
+	return val, nil
 }
-func (*memoryCacher) Keys() []interface{} {
-	return nil
+func (mc *memoryCacher) Keys() []interface{} {
+	keys := make([]interface{}, 0, mc.Len())
+	for k := range mc.cache {
+		keys = append(keys, k)
+	}
+	return keys
 }
-func (*memoryCacher) Pull(key interface{}) (interface{}, error) {
-	return nil, nil
+func (mc *memoryCacher) Pull(key interface{}) (interface{}, error) {
+	val, err := mc.Get(key)
+	mc.Remove(key)
+	return val, err
 }
-func (*memoryCacher) Remove(key interface{}) bool {
-	return false
+func (mc *memoryCacher) Remove(key interface{}) bool {
+	delete(mc.cache, key)
+	return true
 }
-func (*memoryCacher) Len() int {
-	return 0
+func (mc *memoryCacher) Len() int {
+	return len(mc.cache)
 }
-func (*memoryCacher) Clear() error {
+func (mc *memoryCacher) Clear() error {
+	mc.cache = map[interface{}]*cacherItem{}
 	return nil
 }
