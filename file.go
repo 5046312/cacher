@@ -1,4 +1,4 @@
-package cacher
+package gocacher
 
 import "time"
 
@@ -7,9 +7,6 @@ type File struct {
 	EXT  string
 }
 
-func (*File) Init(opt map[string]interface{}) {
-
-}
 func (*File) Set(key, value interface{}) error {
 	return nil
 }

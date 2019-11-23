@@ -1,38 +1,42 @@
-package cacher
+package gocacher
 
 import "time"
 
-type Memory struct {
-	GCTime time.Duration
+type memoryCacher struct {
+	GC time.Duration
 }
 
-func (*Memory) Init(opt map[string]interface{}) {
+func (mc *memoryCacher) Clone() *memoryCacher {
+	newCacher := &memoryCacher{
+		GC: mc.GC,
+	}
+	return newCacher
+}
 
-}
-func (*Memory) Set(key, value interface{}) error {
+func (*memoryCacher) Set(key, value interface{}) error {
 	return nil
 }
-func (*Memory) SetExpire(key, value interface{}, exp time.Duration) error {
+func (*memoryCacher) SetExpire(key, value interface{}, exp time.Duration) error {
 	return nil
 }
-func (*Memory) Has(key interface{}) bool {
+func (*memoryCacher) Has(key interface{}) bool {
 	return false
 }
-func (*Memory) Get(key interface{}) (interface{}, error) {
+func (*memoryCacher) Get(key interface{}) (interface{}, error) {
 	return nil, nil
 }
-func (*Memory) Keys() []interface{} {
+func (*memoryCacher) Keys() []interface{} {
 	return nil
 }
-func (*Memory) Pull(key interface{}) (interface{}, error) {
+func (*memoryCacher) Pull(key interface{}) (interface{}, error) {
 	return nil, nil
 }
-func (*Memory) Remove(key interface{}) bool {
+func (*memoryCacher) Remove(key interface{}) bool {
 	return false
 }
-func (*Memory) Len() int {
+func (*memoryCacher) Len() int {
 	return 0
 }
-func (*Memory) Clear() error {
+func (*memoryCacher) Clear() error {
 	return nil
 }

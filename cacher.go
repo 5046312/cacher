@@ -1,11 +1,10 @@
-package cacher
+package gocacher
 
 import (
 	"time"
 )
 
 type cacher interface {
-	Init(opt map[string]interface{})
 	Set(key, value interface{}) error
 	SetExpire(key, value interface{}, exp time.Duration) error
 	Has(key interface{}) bool
@@ -16,3 +15,5 @@ type cacher interface {
 	Keys() []interface{}
 	Len() int
 }
+
+var Memory cacher = &memoryCacher{}
