@@ -1,6 +1,8 @@
 package gocacher
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"time"
 )
@@ -28,6 +30,25 @@ type cacherItem struct {
 // 该数据是否过期
 func (ci *cacherItem) expired() bool {
 	return ci.exp.Before(time.Now())
+}
+
+// Gob Encode
+func gobEncode(ci *cacherItem) []byte {
+	buffer := bytes.NewBuffer(nil)
+	encoder := gob.NewEncoder(buffer)
+	err := encoder.Encode(ci)
+	if err != nil {
+		return nil
+	}
+	return buffer.Bytes()
+}
+
+// Gob Decode
+func gobDecode(data []byte) (ci *cacherItem, err error) {
+	buffer := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buffer)
+	err = decoder.Decode(&ci)
+	return
 }
 
 var (

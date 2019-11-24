@@ -31,12 +31,11 @@ func (mc *memoryCacher) Init(config map[string]interface{}) cacher {
 // Clone 一个新的缓存对象
 func (mc *memoryCacher) Clone(config map[string]interface{}) cacher {
 	newCacher := &memoryCacher{
-		gc:    gcTime,
+		gc:    mc.gc,
 		cache: map[string]*cacherItem{},
 	}
 	newCacher.runGc(gcTime)
-	newCacher.Init(config)
-	return newCacher
+	return newCacher.Init(config)
 }
 
 // 设置一个永久时间的缓存
