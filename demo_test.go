@@ -22,8 +22,19 @@ func Test_Memory(t *testing.T) {
 	mLen := Memory.Len()
 	t.Log(mLen)
 
-	Memory.Set(map[string]string{"123": "abc"}, 123)
+	Memory.Set("a", false)
 
 	keys := Memory.Keys()
 	t.Log(keys)
+
+	t.Log(Memory.Get("a"))
+
+	Memory.Clear()
+	t.Log(Memory.Keys())
+
+	mc := Memory.Clone(nil)
+	mc.Set("abc", "123")
+	t.Log(mc.Keys())
+	t.Log(mc.Pull("abc"))
+	t.Log(mc.Get("abc"))
 }

@@ -5,19 +5,18 @@ import "time"
 var Memory cacher
 
 type memoryCacher struct {
-	cache map[interface{}]*cacherItem
+	cache map[string]*cacherItem
 	gc    time.Duration
 }
 
 func init() {
 	cacher := &memoryCacher{
 		gc:    gcTime,
-		cache: map[interface{}]*cacherItem{},
+		cache: map[string]*cacherItem{},
 	}
 	cacher.runGc(gcTime)
 	Memory = cacher
 }
-
 func (mc *memoryCacher) Init(config map[string]interface{}) cacher {
 	if val, ok := config["gc"].(time.Duration); ok {
 		if val != mc.gc {
@@ -33,7 +32,7 @@ func (mc *memoryCacher) Init(config map[string]interface{}) cacher {
 func (mc *memoryCacher) Clone(config map[string]interface{}) cacher {
 	newCacher := &memoryCacher{
 		gc:    gcTime,
-		cache: map[interface{}]*cacherItem{},
+		cache: map[string]*cacherItem{},
 	}
 	newCacher.runGc(gcTime)
 	newCacher.Init(config)
@@ -41,11 +40,10 @@ func (mc *memoryCacher) Clone(config map[string]interface{}) cacher {
 }
 
 // 设置一个永久时间的缓存
-func (mc *memoryCacher) Set(key, value interface{}) error {
+func (mc *memoryCacher) Set(key string, value interface{}) error {
 	return mc.SetExpire(key, value, 0)
 }
-
-func (mc *memoryCacher) SetExpire(key, value interface{}, exp time.Duration) error {
+func (mc *memoryCacher) SetExpire(key string, value interface{}, exp time.Duration) error {
 	ci := &cacherItem{
 		key: key,
 		val: value,
@@ -58,11 +56,11 @@ func (mc *memoryCacher) SetExpire(key, value interface{}, exp time.Duration) err
 	mc.cache[key] = ci
 	return nil
 }
-func (mc *memoryCacher) Has(key interface{}) bool {
+func (mc *memoryCacher) Has(key string) bool {
 	_, exist := mc.cache[key]
 	return exist
 }
-func (mc *memoryCacher) Get(key interface{}) (interface{}, error) {
+func (mc *memoryCacher) Get(key string) (interface{}, error) {
 	item, exist := mc.cache[key]
 	if exist && item.expired() {
 		// 判断是否过期
@@ -73,19 +71,23 @@ func (mc *memoryCacher) Get(key interface{}) (interface{}, error) {
 	}
 	return item.val, nil
 }
-func (mc *memoryCacher) Keys() []interface{} {
-	keys := make([]interface{}, 0, mc.Len())
-	for k := range mc.cache {
-		keys = append(keys, k)
+func (mc *memoryCacher) Keys() []string {
+	keys := []string{}
+	for k, v := range mc.cache {
+		if v.expired() {
+			mc.Remove(k)
+		} else {
+			keys = append(keys, k)
+		}
 	}
 	return keys
 }
-func (mc *memoryCacher) Pull(key interface{}) (interface{}, error) {
+func (mc *memoryCacher) Pull(key string) (interface{}, error) {
+	defer mc.Remove(key)
 	val, err := mc.Get(key)
-	mc.Remove(key)
 	return val, err
 }
-func (mc *memoryCacher) Remove(key interface{}) bool {
+func (mc *memoryCacher) Remove(key string) bool {
 	delete(mc.cache, key)
 	return true
 }
@@ -93,7 +95,7 @@ func (mc *memoryCacher) Len() int {
 	return len(mc.cache)
 }
 func (mc *memoryCacher) Clear() error {
-	mc.cache = map[interface{}]*cacherItem{}
+	mc.cache = map[string]*cacherItem{}
 	return nil
 }
 
