@@ -40,33 +40,36 @@ func Test_Memory(t *testing.T) {
 }
 
 func Test_File(t *testing.T) {
-	err := File.Set("a", 123)
-	t.Log(err)
+	// err := File.Set("a", 123)
+	// t.Log(err)
 
-	//val, err := File.Get("a")
-	//t.Log(val, err)
-	//
-	//val, err = File.Get("b")
-	//t.Log(val, err)
-	//
-	//File.Remove("c")
-	//File.Remove("b")
-	//
-	//val, err = File.Get("b")
-	//t.Log(val, err)
-	//
-	//mLen := File.Len()
-	//t.Log(mLen)
-	//
-	//File.Set("a", false)
-	//
-	//keys := File.Keys()
-	//t.Log(keys)
+	// val, err := File.Get("a")
+	// t.Log(val, err)
+
+	// val, err = File.Get("b")
+	// t.Log(val, err)
+
+	// err = File.Set("a", 456)
+	// t.Log(err)
+
+	// val, err = File.Get("a")
+	// t.Log(val, err)
+
+	// File.Remove("c")
+	// File.Remove("a")
+
+	// mLen := File.Len()
+	// t.Log(mLen)
+	// //
+	// File.Set("a", false)
+	// //
+	// keys := File.Keys()
+	// t.Log(keys)
 	//
 	//t.Log(File.Get("a"))
 	//
-	//File.Clear()
-	//t.Log(File.Keys())
+	File.Clear()
+	t.Log(File.Keys())
 	//
 	//fc := File.Clone(nil)
 	//fc.Set("abc", "123")

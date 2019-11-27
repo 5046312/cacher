@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -22,25 +23,26 @@ type cacher interface {
 }
 
 type cacherItem struct {
-	key string
-	val interface{}
-	exp time.Time
+	Key string
+	Val interface{}
+	Exp time.Time
 }
 
 // 该数据是否过期
 func (ci *cacherItem) expired() bool {
-	return ci.exp.Before(time.Now())
+	return ci.Exp.Before(time.Now())
 }
 
 // Gob Encode
-func gobEncode(ci *cacherItem) []byte {
+func gobEncode(ci *cacherItem) string {
 	buffer := bytes.NewBuffer(nil)
 	encoder := gob.NewEncoder(buffer)
 	err := encoder.Encode(ci)
 	if err != nil {
-		return nil
+		log.Println(err)
+		return ""
 	}
-	return buffer.Bytes()
+	return buffer.String()
 }
 
 // Gob Decode
@@ -54,6 +56,9 @@ func gobDecode(data []byte) (ci *cacherItem, err error) {
 var (
 	gcTime  = time.Hour
 	farTime = time.Date(3018, 11, 23, 22, 44, 0, 0, time.Local)
+)
 
+var (
 	KeyNotExistError = errors.New("key not exist")
+	KeyExpireError   = errors.New("key expired")
 )

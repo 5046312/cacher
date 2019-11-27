@@ -44,13 +44,13 @@ func (mc *memoryCacher) Set(key string, value interface{}) error {
 }
 func (mc *memoryCacher) SetExpire(key string, value interface{}, exp time.Duration) error {
 	ci := &cacherItem{
-		key: key,
-		val: value,
-		exp: time.Now().Add(exp),
+		Key: key,
+		Val: value,
+		Exp: time.Now().Add(exp),
 	}
 	// exp 不大于 0 时，为永久缓存
 	if exp <= 0 {
-		ci.exp = farTime
+		ci.Exp = farTime
 	}
 	mc.cache[key] = ci
 	return nil
@@ -68,7 +68,7 @@ func (mc *memoryCacher) Get(key string) (interface{}, error) {
 	} else if !exist {
 		return nil, nil
 	}
-	return item.val, nil
+	return item.Val, nil
 }
 func (mc *memoryCacher) Keys() []string {
 	keys := []string{}

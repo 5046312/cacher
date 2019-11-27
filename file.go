@@ -2,6 +2,7 @@ package gocacher
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -17,7 +18,7 @@ type fileCacher struct {
 func init() {
 	File = &fileCacher{
 		path: "./runtime/cache",
-		ext:  "",
+		ext:  "cache",
 	}
 }
 
@@ -39,12 +40,13 @@ func (fc *fileCacher) Clone(config map[string]interface{}) cacher {
 	return newCacher.Init(config)
 }
 
-func (*fileCacher) Clear() error {
-	panic("implement me")
+func (fc *fileCacher) Clear() error {
+	return os.RemoveAll(fc.path)
 }
 
-func (*fileCacher) Len() int {
-	panic("implement me")
+func (fc *fileCacher) Len() int {
+	files, _ := ioutil.ReadDir(fc.path)
+	return len(files)
 }
 
 func (fc *fileCacher) Set(key string, value interface{}) error {
@@ -56,41 +58,89 @@ func (fc *fileCacher) SetExpire(key string, value interface{}, exp time.Duration
 		return err
 	}
 	ci := &cacherItem{
-		key: key,
-		val: value,
-		exp: time.Now().Add(exp),
+		Key: key,
+		Val: value,
+		Exp: time.Now().Add(exp),
 	}
 	// exp 不大于 0 时，为永久缓存
 	if exp <= 0 {
-		ci.exp = farTime
+		ci.Exp = farTime
 	}
 
 	//
-	path, err := fc.filename(key)
+	filename := fc.filename(key)
+	file, err := os.Create(filename)
+	defer file.Close()
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, gobEncode(ci), os.ModePerm)
+	encode := gobEncode(ci)
+	file.WriteString(encode)
+	return nil
 }
 
-func (*fileCacher) Has(key string) bool {
-	panic("implement me")
+func (fc *fileCacher) Has(key string) bool {
+	_, err := fc.Get(key)
+	return err == nil
 }
 
-func (*fileCacher) Get(key string) (interface{}, error) {
-	panic("implement me")
+func (fc *fileCacher) Get(key string) (interface{}, error) {
+	filename := fc.filename(key)
+	file, err := os.Open(filename)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	ci, err := gobDecode(content)
+	if ci.expired() {
+		fc.Remove(key)
+		return nil, KeyExpireError
+	}
+	return ci.Val, nil
 }
 
-func (*fileCacher) Pull(key string) (interface{}, error) {
-	panic("implement me")
+func (fc *fileCacher) Pull(key string) (interface{}, error) {
+	val, err := fc.Get(key)
+	if err != nil {
+		return val, err
+	}
+	fc.Remove(key)
+	return val, nil
 }
 
-func (*fileCacher) Remove(key string) bool {
-	panic("implement me")
+func (fc *fileCacher) Remove(key string) bool {
+	os.Remove(fc.filename(key))
+	return true
 }
 
-func (*fileCacher) Keys() []string {
-	panic("implement me")
+func (fc *fileCacher) Keys() []string {
+	keys := []string{}
+	files, _ := ioutil.ReadDir(fc.path)
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		file, err := os.Open(strings.Trim(fc.path, "/") + "/" + file.Name())
+		defer file.Close()
+		if err != nil {
+			log.Fatalln("读取文件失败")
+		}
+		content, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatalln("读取文件内容失败")
+		}
+		ci, err := gobDecode(content)
+		if ci.expired() {
+			fc.Remove(ci.Key)
+		} else {
+			keys = append(keys, ci.Key)
+		}
+	}
+	return keys
 }
 
 // 初始化文件目录
@@ -99,8 +149,6 @@ func (fc *fileCacher) fs() error {
 }
 
 // 获取文件名
-func (fc *fileCacher) filename(key string) (path string, err error) {
-	path = strings.Trim(fc.path+"/"+key+"."+strings.Trim(fc.ext, "."), ".")
-	err = os.MkdirAll(path, os.ModePerm)
-	return
+func (fc *fileCacher) filename(key string) string {
+	return fc.path + "/" + key + "." + strings.Trim(fc.ext, ".")
 }
