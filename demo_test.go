@@ -40,8 +40,11 @@ func Test_Memory(t *testing.T) {
 }
 
 func Test_File(t *testing.T) {
-	// err := File.Set("a", 123)
-	// t.Log(err)
+	type test struct {
+		A string
+	}
+	err := File.Set("a", &test{"abc"})
+	t.Log(err)
 
 	// val, err := File.Get("a")
 	// t.Log(val, err)
@@ -68,8 +71,8 @@ func Test_File(t *testing.T) {
 	//
 	//t.Log(File.Get("a"))
 	//
-	File.Clear()
-	t.Log(File.Keys())
+	//File.Clear()
+	//t.Log(File.Keys())
 	//
 	//fc := File.Clone(nil)
 	//fc.Set("abc", "123")

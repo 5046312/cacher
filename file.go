@@ -54,9 +54,6 @@ func (fc *fileCacher) Set(key string, value interface{}) error {
 }
 
 func (fc *fileCacher) SetExpire(key string, value interface{}, exp time.Duration) error {
-	if err := fc.fs(); err != nil {
-		return err
-	}
 	ci := &cacherItem{
 		Key: key,
 		Val: value,
@@ -66,6 +63,14 @@ func (fc *fileCacher) SetExpire(key string, value interface{}, exp time.Duration
 	if exp <= 0 {
 		ci.Exp = farTime
 	}
+	encode, err := gobEncode(ci)
+	if err != nil {
+		return err
+	}
+
+	if err := fc.fs(); err != nil {
+		return err
+	}
 
 	//
 	filename := fc.filename(key)
@@ -74,7 +79,6 @@ func (fc *fileCacher) SetExpire(key string, value interface{}, exp time.Duration
 	if err != nil {
 		return err
 	}
-	encode := gobEncode(ci)
 	file.WriteString(encode)
 	return nil
 }

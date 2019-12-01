@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"errors"
-	"log"
 	"time"
 )
 
@@ -36,15 +35,15 @@ func (ci *cacherItem) expired() bool {
 }
 
 // Gob Encode
-func gobEncode(ci *cacherItem) string {
+func gobEncode(ci *cacherItem) (string, error) {
+	gob.Register(ci.Val)
 	buffer := bytes.NewBuffer(nil)
 	encoder := gob.NewEncoder(buffer)
 	err := encoder.Encode(ci)
 	if err != nil {
-		log.Println(err)
-		return ""
+		return "", err
 	}
-	return buffer.String()
+	return buffer.String(), nil
 }
 
 // Gob Decode
