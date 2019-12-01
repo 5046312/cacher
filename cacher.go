@@ -2,7 +2,9 @@ package gocacher
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/gob"
+	"encoding/hex"
 	"errors"
 	"log"
 	"time"
@@ -51,6 +53,13 @@ func gobDecode(data []byte) (ci *cacherItem, err error) {
 	decoder := gob.NewDecoder(buffer)
 	err = decoder.Decode(&ci)
 	return
+}
+
+// Md5
+func md5Encode(ori string) string {
+	h := md5.New()
+	h.Write([]byte(ori))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 var (

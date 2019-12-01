@@ -150,5 +150,5 @@ func (fc *fileCacher) fs() error {
 
 // 获取文件名
 func (fc *fileCacher) filename(key string) string {
-	return fc.path + "/" + key + "." + strings.Trim(fc.ext, ".")
+	return fc.path + "/" + md5Encode(key) + "." + strings.Trim(fc.ext, ".")
 }
